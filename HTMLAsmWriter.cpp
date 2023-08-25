@@ -3007,7 +3007,6 @@ void HTMLAssemblyWriter::printHTMLStart(const std::string Title) {
   Out << "<head>\n";
   printHTMLMainStyles();
   printHTMLTagsStyles();
-  std::cout << "CSSFileName: " << CSSFileName << "\n";
   Out << "<link rel=\"stylesheet\" href=\"" << CSSFileName << "\">\n";
   Out << "<title>";
   Out << Title;
@@ -3111,10 +3110,8 @@ void HTMLAssemblyWriter::printHTMLOperand(std::string Text, const Value *V) {
 
 void HTMLAssemblyWriter::printHTMLOperand(std::string Text, uint64_t Tag) {
   if (KnownHTMLTags.count(Tag) > 0) {
-    std::cout << "KNOWN tag: " << Tag << " for " << Text << "\n";
     printHTMLTagLink(Text, Tag);
   } else {
-    std::cout << "Unknown tag: " << Tag << " for " << Text << "\n";
     Out << Text;
   }
 }
@@ -3158,7 +3155,6 @@ void HTMLAssemblyWriter::collectAllHTMLFunctionTags(const Module *M) {
     collectAllHTMLBodyTags(&F);
   }
   for (auto GI = M->global_begin(); GI != M->global_end(); ++GI) {
-    std::cout << "Inserting GV tag " << getHTMLTag(&(*GI)) << "\n";
     KnownHTMLTags.insert(getHTMLTag(&(*GI)));
   }
 }
