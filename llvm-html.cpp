@@ -7,7 +7,7 @@
 //===----------------------------------------------------------------------===//
 //
 //  llvm-html [options] x.bc - Read LLVM bitcode from the x.bc file, write asm
-//                            to the x.html and emit x.html.css file.
+//                            to the x.html file.
 //  Options:
 //      --help   - Output information about command line switches
 //
@@ -33,6 +33,7 @@
 #include "llvm/Support/ToolOutputFile.h"
 #include "llvm/Support/WithColor.h"
 #include <system_error>
+#include <regex>
 #include "HTMLWriter.h"
 
 using namespace llvm;
@@ -159,6 +160,14 @@ struct LLVMHtmlDiagnosticHandler : public DiagnosticHandler {
 };
 } // end anon namespace
 
+static void inlineCSS(raw_ostream &OS, std::string &Out, std::string &CSS) {
+  std::string ReplacementString;
+  ReplacementString += "<style> \n";
+  ReplacementString += CSS;
+  ReplacementString += "</style> \n";
+  OS << std::regex_replace(Out, std::regex("<link.*>"), ReplacementString);
+}
+
 static ExitOnError ExitOnErr;
 
 int main(int argc, char **argv) {
@@ -236,16 +245,9 @@ int main(int argc, char **argv) {
           FinalFilename += std::string(".") + std::to_string(I);
       }
 
-      std::string FinalCSSFilename = FinalFilename + ".css";
       std::error_code EC;
       std::unique_ptr<ToolOutputFile> Out(
           new ToolOutputFile(FinalFilename, EC, sys::fs::OF_TextWithCRLF));
-      if (EC) {
-        errs() << EC.message() << '\n';
-        return 1;
-      }
-      std::unique_ptr<ToolOutputFile> CSSOut(
-          new ToolOutputFile(FinalCSSFilename, EC, sys::fs::OF_TextWithCRLF));
       if (EC) {
         errs() << EC.message() << '\n';
         return 1;
@@ -255,19 +257,24 @@ int main(int argc, char **argv) {
       if (ShowAnnotations)
         Annotator.reset(new CommentWriter());
 
+      std::string OutString;
+      std::string CSSOutString;
+      raw_string_ostream OutOS(OutString);
+      raw_string_ostream CSSOutOS(CSSOutString);
       if (!DontPrint) {
         if (M) {
           HTMLWriter HTMLW(M.get());
-          HTMLW.print(Out->os(), CSSOut->os(), FinalCSSFilename,
+          HTMLW.print(OutOS, CSSOutOS, "" /* unused filename */,
                       Annotator.get(), PreserveAssemblyUseListOrder);
         }
         if (Index)
           Index->print(Out->os());
       }
 
+      inlineCSS(Out->os(), OutOS.str(), CSSOutOS.str());
+
       // Declare success.
       Out->keep();
-      CSSOut->keep();
     }
   }
 
