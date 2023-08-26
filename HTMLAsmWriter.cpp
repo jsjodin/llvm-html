@@ -5061,7 +5061,7 @@ void Type::print(raw_ostream &OS, bool /*IsForDebug*/, bool NoDetails) const {
       TP.printStructBody(STy, OS);
     }
 }
-
+#if 0
 static bool isReferencingMDNode(const Instruction &I) {
   if (const auto *CI = dyn_cast<CallInst>(&I))
     if (Function *F = CI->getCalledFunction())
@@ -5072,7 +5072,7 @@ static bool isReferencingMDNode(const Instruction &I) {
               return true;
   return false;
 }
-#if 0
+
 void Value::print(raw_ostream &ROS, bool IsForDebug) const {
   bool ShouldInitializeAllMetadata = false;
   if (auto *I = dyn_cast<Instruction>(this))
@@ -5133,6 +5133,7 @@ void Value::print(raw_ostream &ROS, ModuleSlotTracker &MST,
 /// Print without a type, skipping the TypePrinting object.
 ///
 /// \return \c true iff printing was successful.
+#if 0
 static bool printWithoutType(const Value &V, raw_ostream &O,
                              SlotTracker *Machine, const Module *M) {
   if (V.hasName() || isa<GlobalValue>(V) ||
@@ -5155,7 +5156,7 @@ static void printAsOperandImpl(const Value &V, raw_ostream &O, bool PrintType,
   AsmWriterContext WriterCtx(&TypePrinter, MST.getMachine(), MST.getModule());
   WriteAsOperandInternal(O, &V, WriterCtx);
 }
-#if 0
+
 void Value::printAsOperand(raw_ostream &O, bool PrintType,
                            const Module *M) const {
   if (!M)
