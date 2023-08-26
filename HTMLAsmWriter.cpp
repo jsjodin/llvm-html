@@ -3160,6 +3160,13 @@ void HTMLAssemblyWriter::collectAllHTMLFunctionTags(const Module *M) {
 }
 
 void HTMLAssemblyWriter::collectAllHTMLBodyTags(const Function *F) {
+  // Collect Function Arg Tags
+  for (auto &Arg : F->args()) {
+    auto ArgTag = getHTMLTag(&Arg);
+    KnownHTMLTags.insert(ArgTag);
+  }
+
+  // Collect Function Body Tags
   for (const BasicBlock &BB : *F) {
     auto BBTag = getHTMLTag(&BB);
     KnownHTMLTags.insert(BBTag);
@@ -4326,11 +4333,12 @@ void HTMLAssemblyWriter::printArgument(const Argument *Arg, AttributeSet Attrs) 
   // Output name, if available...
   if (Arg->hasName()) {
     Out << ' ';
-    PrintLLVMName(Out, Arg);
+    printHTMLLLVMName(Out, Arg, true);
   } else {
     int Slot = Machine.getLocalSlot(Arg);
     assert(Slot != -1 && "expect argument in function here");
-    Out << " %" << Slot;
+    //    Out << " %" << Slot;
+    printHTMLLLVMName(Out, std::to_string(Slot), LocalPrefix, getHTMLTag(Arg), true);
   }
 }
 
@@ -4344,8 +4352,11 @@ void HTMLAssemblyWriter::printBasicBlock(const BasicBlock *BB) {
   } else if (!IsEntryBlock) {
     Out << "\n";
     int Slot = Machine.getLocalSlot(BB);
-    if (Slot != -1)
-      Out << Slot << ":";
+    if (Slot != -1) {
+      printHTMLLLVMName(Out, std::to_string(Slot), LocalPrefix, getHTMLTag(BB),
+                        true);
+      Out << ":";
+    }
     else
       Out << "<badref>:";
   }
