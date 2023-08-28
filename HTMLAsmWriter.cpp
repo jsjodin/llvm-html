@@ -2937,7 +2937,7 @@ void HTMLAssemblyWriter::writeParamOperand(const Value *Operand,
   Out << ' ';
   // Print the operand
   auto WriterCtx = getContext();
-  WriteAsOperandInternal(Out, Operand, WriterCtx);
+  WriteAsOperandInternal2(Out, Operand, WriterCtx);
 }
 
 void HTMLAssemblyWriter::writeOperandBundles(const CallBase *Call) {
@@ -3114,7 +3114,8 @@ void HTMLAssemblyWriter::printHTMLTag(std::string Text, const void* Tag) {
 }
 
 void HTMLAssemblyWriter::printHTMLTag(std::string Text, uint64_t Tag) {
-  Out << "<a tag id=\"" << getHTMLId(Tag) << "\" href=\"#" << getHTMLId(Tag) << "\">" << Text << "</a>";
+  Out << "<a tag id=\"" << getHTMLId(Tag) << "\" href=\"#" << getHTMLId(Tag)
+      << "\">" << Text << "</a>";
 }
 
 void HTMLAssemblyWriter::printHTMLOperand(std::string Text, const Value *V) {
