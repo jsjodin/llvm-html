@@ -3032,6 +3032,20 @@ void HTMLAssemblyWriter::printCSSDefLinks() {
     }
     CSSOut << " { background-color: #ffa;}\n";
   }
+
+  for (auto &DefUse : DefToUseMap) {
+    uint64_t Tag = DefUse.first;
+    bool IsFirst = true;
+    for (auto &LTag : DefUse.second) {
+      if (IsFirst)
+        IsFirst = false;
+      else
+        CSSOut << ", ";
+      CSSOut << "#" << getHTMLId(Tag) << ":target ~ #" << getHTMLLinkId(LTag);
+    }
+    CSSOut << " { background-color: #ffa;}\n";
+  }
+
 }
 
 void HTMLAssemblyWriter::printHTMLEnd() {
@@ -3100,7 +3114,7 @@ void HTMLAssemblyWriter::printHTMLTag(std::string Text, const void* Tag) {
 }
 
 void HTMLAssemblyWriter::printHTMLTag(std::string Text, uint64_t Tag) {
-  Out << "<tag id=\"" << getHTMLId(Tag) << "\">" << Text << "</tag>";
+  Out << "<a tag id=\"" << getHTMLId(Tag) << "\" href=\"#" << getHTMLId(Tag) << "\">" << Text << "</a>";
 }
 
 void HTMLAssemblyWriter::printHTMLOperand(std::string Text, const Value *V) {
